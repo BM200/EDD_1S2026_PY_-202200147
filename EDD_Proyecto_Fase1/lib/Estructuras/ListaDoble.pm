@@ -85,6 +85,21 @@ sub imprimir_consola {
     print "-------------------------\n";
 }
 
+# Metodo Buscar por Codigo
+sub buscar {
+    my ($self, $codigo_buscado) = @_;
+    return undef if $self->esta_vacia;
+    
+    my $actual = $self->primero;
+    while (defined $actual) {
+        if ($actual->codigo eq $codigo_buscado) {
+            return $actual;
+        }
+        $actual = $actual->siguiente;
+    }
+    return undef;
+}
+
 1;
 
 
