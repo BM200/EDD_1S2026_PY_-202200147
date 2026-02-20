@@ -2,58 +2,45 @@
 use strict;
 use warnings;
 
+# --- RUTAS DE LIBRERÍAS ---
 use lib 'lib/Nodos';
 use lib 'lib/Estructuras';
 use lib 'lib/Utils';
 
-
+# --- IMPORTS ---
 use ListaDoble;
 use ListaCircularProveedores;
-use ListaSolicitudes; # 
+use ListaSolicitudes;
+use MatrizDispersa;
 use CargaArchivos;
 use Graphviz;
-use MatrizDispersa;
 
-# Instancias Globales
-my $inventario = ListaDoble->new();
+# --- INSTANCIAS GLOBALES ---
+my $inventario  = ListaDoble->new();
 my $proveedores = ListaCircularProveedores->new();
-my $solicitudes = ListaSolicitudes->new(); 
-my $matriz = MatrizDispersa->new();
+my $solicitudes = ListaSolicitudes->new();
+my $matriz      = MatrizDispersa->new();
 
+# --- CREDENCIALES ---
+my %credenciales_dept = (
+    "UCI"        => "1234",
+    "URGENCIAS"  => "1111",
+    "PEDIATRIA"  => "2222",
+    "ENFERMERIA" => "3333"
+);
 
+my %credenciales_admin = (
+    "admin" => "admin123"
+);
+
+# --- UTILITARIOS ---
 sub limpiar_pantalla {
     system($^O eq 'MSWin32' ? 'cls' : 'clear');
 }
 
+# --- FLUJO PRINCIPAL ---
+inicio();
 
-# --- DATOS DE USUARIOS (SIMULADOS) ---
-# Hash: Usuario => Contraseña
-my %credenciales_dept = (
-    "UCI"        => "1234",
-    "URGENCIAS"  => "1111",
-    "PEDIATRIA"  => "2222",
-    "ENFERMERIA" => "3333"
-);
-
-my %credenciales_admin = (
-    "admin" => "admin123"
-);
-
-# --- MENU DE INICIO 
-# --- DATOS DE USUARIOS (SIMULADOS) ---
-# Hash: Usuario => Contraseña      
-my %credenciales_dept = (
-    "UCI"        => "1234",
-    "URGENCIAS"  => "1111",
-    "PEDIATRIA"  => "2222",
-    "ENFERMERIA" => "3333"
-);
-
-my %credenciales_admin = (
-    "admin" => "admin123"
-);
-
-# --- MENU DE INICIO (LOGIN REAL) ---
 sub inicio {
     while (1) {
         limpiar_pantalla();
@@ -64,32 +51,32 @@ sub inicio {
         print "Seleccione: ";
         my $op = <STDIN>; chomp($op);
         
-        if ($op == 1) { 
+        if ($op eq "1") { 
             if (login_admin()) {
                 menu_admin(); 
             }
         }
-        elsif ($op == 2) { 
-            # Capturamos el departamento que inició sesión
-            my $depto_logueado = login_usuario();
-            if ($depto_logueado) {
-                menu_usuario($depto_logueado); 
+        elsif ($op eq "2") { 
+            my $depto = login_usuario();
+            if ($depto) {
+                menu_usuario($depto); 
             }
         }
-        elsif ($op == 3) { exit; }
-        else {
-            print "Opcion no valida. Presione Enter..."; <STDIN>;
+        elsif ($op eq "3") { 
+            print "Cerrando sistema...\n";
+            exit; 
         }
     }
 }
 
+# --- LOGINS ---
 sub login_admin {
     print "\n--- LOGIN ADMINISTRADOR ---\n";
-    print "Usuario: "; my $u = <STDIN>; chomp($u);
-    print "Password: "; my $p = <STDIN>; chomp($p);
+    print "Usuario (admin): "; my $u = <STDIN>; chomp($u);
+    print "Password (admin123): "; my $p = <STDIN>; chomp($p);
     
     if (exists $credenciales_admin{$u} && $credenciales_admin{$u} eq $p) {
-        print "Acceso Concedido. Bienvenido Admin.\n";
+        print "Acceso Concedido.\n";
         sleep(1);
         return 1;
     } else {
@@ -102,159 +89,193 @@ sub login_admin {
 sub login_usuario {
     print "\n--- LOGIN DEPARTAMENTAL ---\n";
     print "Codigo Departamento (ej: UCI): "; my $u = <STDIN>; chomp($u);
-    # Convertir a mayúsculas para estandarizar
     $u = uc($u); 
-    
-    print "Password: "; my $p = <STDIN>; chomp($p);
+    print "Password (1234): "; my $p = <STDIN>; chomp($p);
     
     if (exists $credenciales_dept{$u} && $credenciales_dept{$u} eq $p) {
-        print "Acceso Concedido. Bienvenido $u.\n";
+        print "Acceso Concedido a $u.\n";
         sleep(1);
-        return $u; # Retornamos el nombre del departamento
+        return $u;
     } else {
-        print "ERROR: Departamento no existe o password incorrecto.\n";
+        print "ERROR: Credenciales incorrectas.\n";
         sleep(1);
         return 0;
     }
 }
 
-# --- ROL: USUARIO DEPARTAMENTO ---
+# --- MENU USUARIO (DEPARTAMENTO) ---
 sub menu_usuario {
-    my ($nombre_depto) = @_; # Recibimos el nombre del depto logueado
-    
+    my ($nombre_depto) = @_;
     my $salir = 0;
+    
     while (!$salir) {
         limpiar_pantalla();
-        print "\n--- PANEL DEPARTAMENTO: $nombre_depto ---\n"; # Mostrar nombre
+        print "\n--- PANEL DEPARTAMENTO: $nombre_depto ---\n";
         print "1. Crear Solicitud de Reabastecimiento\n";
-        print "2. Cerrar Sesion\n";
+        print "2. Ver Mis Solicitudes (Opcional)\n";
+        print "3. Cerrar Sesion\n";
         print "Opcion: ";
         my $op = <STDIN>; chomp($op);
         
         if ($op == 1) {
-            # Ya no pedimos el departamento, usamos el del login
             print "Codigo Medicamento: "; my $cod = <STDIN>; chomp($cod);
-            print "Cantidad Requerida: "; my $cant = <STDIN>; chomp($cant);
-            print "Prioridad (Alta/Baja): "; my $prio = <STDIN>; chomp($prio);
-            
-            $solicitudes->crear_solicitud(
-                departamento => $nombre_depto, # Usamos la variable
-                codigo_med   => $cod,
-                cantidad     => $cant,
-                prioridad    => $prio
-            );
-            print "Presione Enter para continuar..."; <STDIN>;
+            # Validar que exista el med (Opcional pero recomendado)
+            if ($inventario->buscar($cod)) {
+                print "Cantidad Requerida: "; my $cant = <STDIN>; chomp($cant);
+                print "Prioridad (Alta/Baja): "; my $prio = <STDIN>; chomp($prio);
+                
+                $solicitudes->crear_solicitud(
+                    departamento => $nombre_depto,
+                    codigo_med   => $cod,
+                    cantidad     => $cant,
+                    prioridad    => $prio
+                );
+            } else {
+                print "Error: El medicamento no existe en el catalogo.\n";
+            }
+            print "Presione Enter..."; <STDIN>;
         }
-        elsif ($op == 2) { $salir = 1; }
+        elsif ($op == 2) {
+            $solicitudes->imprimir_consola(); # Muestra todas por ahora
+            print "Presione Enter..."; <STDIN>;
+        }
+        elsif ($op == 3) { $salir = 1; }
     }
 }
 
-# --- ROL: ADMINISTRADOR ---
-
+# --- MENU ADMINISTRADOR ---
 sub menu_admin {
     my $salir = 0;
     while (!$salir) {
+        limpiar_pantalla();
         print "\n--- PANEL ADMINISTRADOR ---\n";
         print "1. Cargar Inventario (CSV)\n";
         print "2. Gestionar Proveedores\n";
-        print "3. Registrar Entrega (Entrada de Stock)\n";
-        print "4. ATENDER SOLICITUDES (Salida de Stock)\n"; 
-        print "5. Ver Inventario\n";
-        print "6. Generar Reportes\n";
+        print "3. Registrar Entrega (Entrada Stock)\n";
+        print "4. ATENDER SOLICITUDES (Salida Stock)\n";
+        print "5. Ver Inventario / Matriz\n";
+        print "6. Generar Reportes Graficos\n";
         print "7. Cerrar Sesion\n";
         print "Opcion: ";
         
         my $op = <STDIN>; chomp($op);
         
         if ($op == 1) {
-
-        CargaArchivos::cargar_medicamentos($inventario, $archivo);
-
-        my $actual = $inventario->primero;
+            print "Ruta archivo: "; 
+            my $archivo = <STDIN>; # Declaramos $archivo aqui con 'my'
+            chomp($archivo);
+            $archivo = "datos/medicamentos.csv" if $archivo eq "";
+            
+            # Cargar Lista Doble
+            CargaArchivos::cargar_medicamentos($inventario, $archivo);
+            
+            # Cargar Matriz Dispersa automáticamente
+            my $actual = $inventario->primero;
             while (defined $actual) {
-                # Insertamos: Medicamento, Laboratorio, Precio
                 $matriz->insertar_elemento(
-                    $actual->nombre,       # Fila
-                    $actual->laboratorio,  # Columna
+                    $actual->nombre,       # Fila (Med)
+                    $actual->laboratorio,  # Columna (Lab)
                     $actual->precio        # Valor
                 );
                 $actual = $actual->siguiente;
             }
-            print "Matriz dispersa actualizada con precios.\n";
-
+            print "Matriz de Precios actualizada correctamente.\n";
+            print "Presione Enter..."; <STDIN>;
         }
-        elsif ($op == 2) { menu_proveedores(); }
-        elsif ($op == 3) { menu_entrega_prov(); }
-        elsif ($op == 4) { menu_atender_solicitudes(); }
-        elsif ($op == 5) { $inventario->imprimir_consola(); }
+        elsif ($op == 2) { 
+            menu_proveedores(); 
+        }
+        elsif ($op == 3) { 
+            menu_entrega_prov(); 
+        }
+        elsif ($op == 4) { 
+            menu_atender_solicitudes(); 
+        }
+        elsif ($op == 5) {
+            print "\n1. Lista Lineal (Inventario)\n2. Matriz Dispersa (Precios)\nEleccion: ";
+            my $sel = <STDIN>; chomp($sel);
+            if ($sel == 1) { $inventario->imprimir_consola(); }
+            elsif ($sel == 2) { $matriz->imprimir_consola(); }
+            print "Enter para volver..."; <STDIN>;
+        }
         elsif ($op == 6) {
             print "Generando reportes...\n";
             Graphviz::generar_reporte_inventario($inventario);
             Graphviz::generar_reporte_proveedores($proveedores);
-            # Graphviz::generar_reporte_solicitudes($solicitudes); 
+            Graphviz::generar_reporte_solicitudes($solicitudes);
+            Graphviz::generar_reporte_matriz($matriz); 
+            print "Reportes generados en carpeta /reportes.\n";
+            print "Enter para volver..."; <STDIN>;
         }
         elsif ($op == 7) { $salir = 1; }
     }
 }
 
-# Submenú Proveedores 
+# --- SUBMENUS ---
+
 sub menu_proveedores {
-    print "1. Registrar / 2. Ver: "; my $op = <STDIN>; chomp($op);
+    print "\n--- Proveedores ---\n";
+    print "1. Registrar Nuevo\n2. Ver Lista\nOpcion: "; 
+    my $op = <STDIN>; chomp($op);
+    
     if ($op == 1) {
         print "NIT: "; my $n = <STDIN>; chomp($n);
         print "Nombre: "; my $no = <STDIN>; chomp($no);
         $proveedores->insertar_proveedor(nit=>$n, nombre=>$no);
-    } elsif ($op == 2) { $proveedores->imprimir_consola(); }
+    } 
+    elsif ($op == 2) { 
+        $proveedores->imprimir_consola(); 
+    }
+    print "Enter..."; <STDIN>;
 }
 
-# Submenú Entrega 
 sub menu_entrega_prov {
+    print "\n--- Registrar Entrada ---\n";
     print "NIT Proveedor: "; my $nit = <STDIN>; chomp($nit);
-    unless ($proveedores->buscar_proveedor($nit)) { print "No existe.\n"; return; }
+    unless ($proveedores->buscar_proveedor($nit)) { print "Proveedor no existe.\nEnter..."; <STDIN>; return; }
     
     print "Cod Med: "; my $cod = <STDIN>; chomp($cod);
     my $med = $inventario->buscar($cod);
-    unless ($med) { print "Med no existe.\n"; return; }
+    unless ($med) { print "Med no existe en inventario.\nEnter..."; <STDIN>; return; }
     
     print "Cantidad: "; my $c = <STDIN>; chomp($c);
     print "Factura: "; my $f = <STDIN>; chomp($f);
+    print "Fecha: "; my $d = <STDIN>; chomp($d);
     
-    $proveedores->agregar_entrega($nit, codigo_med=>$cod, cantidad=>$c, factura=>$f);
-    $med->stock($med->stock + $c); # SUMA STOCK
-    print "Stock aumentado.\n";
+    $proveedores->agregar_entrega($nit, codigo_med=>$cod, cantidad=>$c, factura=>$f, fecha=>$d);
+    $med->stock($med->stock + $c);
+    print "Stock actualizado: " . $med->stock . "\n";
+    print "Enter..."; <STDIN>;
 }
 
-# --- LOGICA DE ATENDER SOLICITUDES (Salida de Stock) ---
 sub menu_atender_solicitudes {
+    limpiar_pantalla();
     $solicitudes->imprimir_consola();
     return if $solicitudes->esta_vacia;
     
-    print "\nIngrese ID de solicitud a procesar (0 para cancelar): ";
+    print "\nID Solicitud a procesar (0 cancelar): ";
     my $id = <STDIN>; chomp($id);
     return if $id == 0;
     
     my $sol = $solicitudes->buscar($id);
-    unless ($sol) { print "ID no encontrado.\n"; return; }
+    unless ($sol) { print "ID invalido.\nEnter..."; <STDIN>; return; }
     
-    print "Accion: 1. Aprobar (Despachar) / 2. Rechazar: ";
-    my $accion = <STDIN>; chomp($accion);
+    print "1. APROBAR (Descontar Stock)\n2. RECHAZAR\nOpcion: ";
+    my $acc = <STDIN>; chomp($acc);
     
-    if ($accion == 1) {
-        # Verificar Stock
+    if ($acc == 1) {
         my $med = $inventario->buscar($sol->codigo_med);
         if ($med && $med->stock >= $sol->cantidad) {
-            $med->stock($med->stock - $sol->cantidad); # RESTA STOCK
-            print "Solicitud Aprobada. Stock restante de " . $med->codigo . ": " . $med->stock . "\n";
+            $med->stock($med->stock - $sol->cantidad);
+            print "Aprobada. Stock restante: " . $med->stock . "\n";
             $solicitudes->eliminar($id);
         } else {
-            print "ERROR: Stock insuficiente o medicamento no existe.\n";
+            print "ERROR: Stock insuficiente (" . ($med ? $med->stock : 0) . ").\n";
         }
     }
-    elsif ($accion == 2) {
-        print "Solicitud Rechazada.\n";
+    elsif ($acc == 2) {
+        print "Rechazada.\n";
         $solicitudes->eliminar($id);
     }
+    print "Enter..."; <STDIN>;
 }
-
-# Arrancar
-inicio();

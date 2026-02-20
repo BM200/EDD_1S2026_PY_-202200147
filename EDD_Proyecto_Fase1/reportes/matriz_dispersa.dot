@@ -1,0 +1,132 @@
+digraph SparseMatrix {
+    node [shape=box, fontname="Arial"];
+    rankdir=TB;
+    nodesep=0.5;
+    ranksep=0.5;
+    Mt [label="Matriz", style=filled, fillcolor=grey, group=0];
+    { rank=same; Mt; C_0 [label="LabFarma", group=1, style=filled, fillcolor=lightblue]; C_1 [label="MediPharma", group=2, style=filled, fillcolor=lightblue]; C_2 [label="GenericLab", group=3, style=filled, fillcolor=lightblue]; C_3 [label="BioFarma", group=4, style=filled, fillcolor=lightblue]; C_4 [label="CardioMed", group=5, style=filled, fillcolor=lightblue]; C_5 [label="AntibioLab", group=6, style=filled, fillcolor=lightblue]; C_6 [label="DiabetPharma", group=7, style=filled, fillcolor=lightblue]; C_7 [label="RespiraLab", group=8, style=filled, fillcolor=lightblue]; C_8 [label="NeuroPharma", group=9, style=filled, fillcolor=lightblue]; C_9 [label="EndocrinoLab", group=10, style=filled, fillcolor=lightblue]; }
+    Mt -> C_0;
+    C_0 -> C_1;
+    C_1 -> C_2;
+    C_2 -> C_3;
+    C_3 -> C_4;
+    C_4 -> C_5;
+    C_5 -> C_6;
+    C_6 -> C_7;
+    C_7 -> C_8;
+    C_8 -> C_9;
+    R_0 [label="Tylenol", group=0, style=filled, fillcolor=lightyellow];
+    Mt -> R_0;
+    N_0_0 [label="Q2.50", shape=circle, style=filled, fillcolor=white, width=0.8, group=1];
+    { rank=same; R_0; N_0_0; }
+    R_0 -> N_0_0 [constraint=false];
+    R_1 [label="Amoxil", group=0, style=filled, fillcolor=lightyellow];
+    R_0 -> R_1;
+    N_1_1 [label="Q12.50", shape=circle, style=filled, fillcolor=white, width=0.8, group=2];
+    { rank=same; R_1; N_1_1; }
+    R_1 -> N_1_1 [constraint=false];
+    R_2 [label="Advil", group=0, style=filled, fillcolor=lightyellow];
+    R_1 -> R_2;
+    N_2_2 [label="Q4.20", shape=circle, style=filled, fillcolor=white, width=0.8, group=3];
+    { rank=same; R_2; N_2_2; }
+    R_2 -> N_2_2 [constraint=false];
+    R_3 [label="Prilosec", group=0, style=filled, fillcolor=lightyellow];
+    R_2 -> R_3;
+    N_3_0 [label="Q5.75", shape=circle, style=filled, fillcolor=white, width=0.8, group=1];
+    { rank=same; R_3; N_3_0; }
+    R_3 -> N_3_0 [constraint=false];
+    R_4 [label="Glucophage", group=0, style=filled, fillcolor=lightyellow];
+    R_3 -> R_4;
+    N_4_3 [label="Q3.90", shape=circle, style=filled, fillcolor=white, width=0.8, group=4];
+    { rank=same; R_4; N_4_3; }
+    R_4 -> N_4_3 [constraint=false];
+    R_5 [label="Zantac", group=0, style=filled, fillcolor=lightyellow];
+    R_4 -> R_5;
+    N_5_2 [label="Q6.30", shape=circle, style=filled, fillcolor=white, width=0.8, group=3];
+    { rank=same; R_5; N_5_2; }
+    R_5 -> N_5_2 [constraint=false];
+    R_6 [label="Cozaar", group=0, style=filled, fillcolor=lightyellow];
+    R_5 -> R_6;
+    N_6_4 [label="Q8.20", shape=circle, style=filled, fillcolor=white, width=0.8, group=5];
+    { rank=same; R_6; N_6_4; }
+    R_6 -> N_6_4 [constraint=false];
+    R_7 [label="Lipitor", group=0, style=filled, fillcolor=lightyellow];
+    R_6 -> R_7;
+    N_7_4 [label="Q15.80", shape=circle, style=filled, fillcolor=white, width=0.8, group=5];
+    { rank=same; R_7; N_7_4; }
+    R_7 -> N_7_4 [constraint=false];
+    R_8 [label="Voltaren", group=0, style=filled, fillcolor=lightyellow];
+    R_7 -> R_8;
+    N_8_2 [label="Q3.75", shape=circle, style=filled, fillcolor=white, width=0.8, group=3];
+    { rank=same; R_8; N_8_2; }
+    R_8 -> N_8_2 [constraint=false];
+    R_9 [label="Cipro", group=0, style=filled, fillcolor=lightyellow];
+    R_8 -> R_9;
+    N_9_5 [label="Q18.50", shape=circle, style=filled, fillcolor=white, width=0.8, group=6];
+    { rank=same; R_9; N_9_5; }
+    R_9 -> N_9_5 [constraint=false];
+    R_10 [label="Zithromax", group=0, style=filled, fillcolor=lightyellow];
+    R_9 -> R_10;
+    N_10_5 [label="Q22.00", shape=circle, style=filled, fillcolor=white, width=0.8, group=6];
+    { rank=same; R_10; N_10_5; }
+    R_10 -> N_10_5 [constraint=false];
+    R_11 [label="Capoten", group=0, style=filled, fillcolor=lightyellow];
+    R_10 -> R_11;
+    N_11_4 [label="Q4.10", shape=circle, style=filled, fillcolor=white, width=0.8, group=5];
+    { rank=same; R_11; N_11_4; }
+    R_11 -> N_11_4 [constraint=false];
+    R_12 [label="Humulina N", group=0, style=filled, fillcolor=lightyellow];
+    R_11 -> R_12;
+    N_12_6 [label="Q125.00", shape=circle, style=filled, fillcolor=white, width=0.8, group=7];
+    { rank=same; R_12; N_12_6; }
+    R_12 -> N_12_6 [constraint=false];
+    R_13 [label="Humulina R", group=0, style=filled, fillcolor=lightyellow];
+    R_12 -> R_13;
+    N_13_6 [label="Q135.00", shape=circle, style=filled, fillcolor=white, width=0.8, group=7];
+    { rank=same; R_13; N_13_6; }
+    R_13 -> N_13_6 [constraint=false];
+    R_14 [label="Proventil", group=0, style=filled, fillcolor=lightyellow];
+    R_13 -> R_14;
+    N_14_7 [label="Q45.50", shape=circle, style=filled, fillcolor=white, width=0.8, group=8];
+    { rank=same; R_14; N_14_7; }
+    R_14 -> N_14_7 [constraint=false];
+    R_15 [label="Zocor", group=0, style=filled, fillcolor=lightyellow];
+    R_14 -> R_15;
+    N_15_0 [label="Q12.30", shape=circle, style=filled, fillcolor=white, width=0.8, group=1];
+    { rank=same; R_15; N_15_0; }
+    R_15 -> N_15_0 [constraint=false];
+    R_16 [label="Vasotec", group=0, style=filled, fillcolor=lightyellow];
+    R_15 -> R_16;
+    N_16_3 [label="Q5.20", shape=circle, style=filled, fillcolor=white, width=0.8, group=4];
+    { rank=same; R_16; N_16_3; }
+    R_16 -> N_16_3 [constraint=false];
+    R_17 [label="Klonopin", group=0, style=filled, fillcolor=lightyellow];
+    R_16 -> R_17;
+    N_17_8 [label="Q8.90", shape=circle, style=filled, fillcolor=white, width=0.8, group=9];
+    { rank=same; R_17; N_17_8; }
+    R_17 -> N_17_8 [constraint=false];
+    R_18 [label="Euthyrox", group=0, style=filled, fillcolor=lightyellow];
+    R_17 -> R_18;
+    N_18_9 [label="Q6.75", shape=circle, style=filled, fillcolor=white, width=0.8, group=10];
+    { rank=same; R_18; N_18_9; }
+    R_18 -> N_18_9 [constraint=false];
+    C_0 -> N_0_0;
+    N_0_0 -> N_3_0;
+    N_3_0 -> N_15_0;
+    C_1 -> N_1_1;
+    C_2 -> N_2_2;
+    N_2_2 -> N_5_2;
+    N_5_2 -> N_8_2;
+    C_3 -> N_4_3;
+    N_4_3 -> N_16_3;
+    C_4 -> N_6_4;
+    N_6_4 -> N_7_4;
+    N_7_4 -> N_11_4;
+    C_5 -> N_9_5;
+    N_9_5 -> N_10_5;
+    C_6 -> N_12_6;
+    N_12_6 -> N_13_6;
+    C_7 -> N_14_7;
+    C_8 -> N_17_8;
+    C_9 -> N_18_9;
+}

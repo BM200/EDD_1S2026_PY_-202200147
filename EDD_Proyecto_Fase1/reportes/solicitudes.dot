@@ -1,0 +1,5 @@
+digraph G {
+    rankdir=LR;
+    node [shape=circle, style=filled, color=lightblue, fontname="Arial"];
+    Vacio [label="Sin Solicitudes Pendientes", shape=box];
+}
