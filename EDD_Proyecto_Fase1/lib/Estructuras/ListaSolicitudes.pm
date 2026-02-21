@@ -17,16 +17,16 @@ sub esta_vacia {
 sub crear_solicitud {
     my ($self, %args) = @_;
     
-    # Asignar ID automático
     $args{id} = $self->contador_id;
     $self->contador_id($self->contador_id + 1);
+    
+    # El estado por defecto es 'Pendiente' gracias a Moo en el Nodo
     
     my $nuevo = NodoSolicitud->new(%args);
     
     if ($self->esta_vacia) {
         $self->primero($nuevo);
         $self->ultimo($nuevo);
-        # Circularidad doble: Se apunta a sí mismo
         $nuevo->siguiente($nuevo);
         $nuevo->anterior($nuevo);
     }
@@ -34,19 +34,15 @@ sub crear_solicitud {
         my $ultimo = $self->ultimo;
         my $primero = $self->primero;
         
-        # Conexiones:
-        # Ultimo <-> Nuevo
         $ultimo->siguiente($nuevo);
         $nuevo->anterior($ultimo);
         
-        # Nuevo <-> Primero (Cerrar círculo)
         $nuevo->siguiente($primero);
         $primero->anterior($nuevo);
         
-        # Actualizar puntero último
         $self->ultimo($nuevo);
     }
-    print "Solicitud #$args{id} creada exitosamente.\n";
+    print "Solicitud #$args{id} creada (Estado: Pendiente).\n";
 }
 
 # 2. Buscar Solicitud por ID

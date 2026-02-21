@@ -148,7 +148,9 @@ sub generar_reporte_solicitudes {
         do {
             my $label = "ID: " . $actual->id . "\\n" . $actual->departamento . "\\nMed: " . $actual->codigo_med;
             my $color = "lightblue";
-            if ($actual->prioridad =~ /Alta/i) { $color = "salmon"; }
+            if ($actual->estado eq 'Aprobada') { $color = "palegreen"; }
+            elsif ($actual->estado eq 'Rechazada') { $color = "grey"; }
+            elsif ($actual->prioridad =~ /Alta/i && $actual->estado eq 'Pendiente') { $color = "salmon"; }
             
             print $fh "    Sol_" . $actual->id . " [label=\"$label\", fillcolor=$color];\n";
             $actual = $actual->siguiente;
