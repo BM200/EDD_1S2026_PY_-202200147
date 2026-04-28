@@ -1,12 +1,14 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use utf8;
+use Gtk3;
 
 # --- RUTAS DE LIBRERÍAS ---
 use lib 'lib/Nodos';
 use lib 'lib/Estructuras';
 use lib 'lib/Utils';
-
+use lib 'lib/Reportes';
 # --- IMPORTS ---
 use ListaDoble;
 use ListaCircularProveedores;

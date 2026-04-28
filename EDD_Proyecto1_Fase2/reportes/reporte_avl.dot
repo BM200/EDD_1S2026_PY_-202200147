@@ -1,0 +1,35 @@
+digraph G {
+    nodesep=0.2;
+    ranksep=0.4;
+    node [shape=circle, style=filled, fillcolor=lightblue, fixedsize=true, width=1.0, 
+    fontsize=8, fontname="Arial"];
+    COL_30002 [label="COL-30002\nLic.\nCarmen"];
+    COL_30002 -> COL_20001;
+    COL_20001 [label="COL-20001\nDr.\nAlejandro"];
+    COL_20001 -> COL_10003;
+    COL_10003 [label="COL-10003\nDr.\nRoberto"];
+    COL_10003 -> COL_10002;
+    COL_10002 [label="COL-10002\nDra.\nSof�a"];
+    COL_10003 -> COL_10005;
+    COL_10005 [label="COL-10005\nMARIO"];
+    COL_20001 -> COL_20003;
+    COL_20003 [label="COL-20003\nDr.\nFernando"];
+    COL_20003 -> COL_20002;
+    COL_20002 [label="COL-20002\nDra.\nValentina"];
+    COL_20003 -> COL_30001;
+    COL_30001 [label="COL-30001\nLic.\nMaría"];
+    COL_30002 -> COL_40002;
+    COL_40002 [label="COL-40002\nTec.\nSandra"];
+    COL_40002 -> COL_30004;
+    COL_30004 [label="COL-30004\nLic.\nJorge"];
+    COL_30004 -> COL_30003;
+    COL_30003 [label="COL-30003\nLic.\nRosa"];
+    COL_30004 -> COL_40001;
+    COL_40001 [label="COL-40001\nTec.\nLuis"];
+    COL_40002 -> COL_50002;
+    COL_50002 [label="COL-50002\nLic.\nGabriela"];
+    COL_50002 -> COL_50001;
+    COL_50001 [label="COL-50001\nLic.\nPedro"];
+    COL_50002 -> COL_99001;
+    COL_99001 [label="COL-99001\nDr.\nRegistro"];
+}

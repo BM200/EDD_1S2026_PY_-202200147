@@ -38,9 +38,9 @@ sub get_height { return $_[0]->{height}; }
 sub set_left   { $_[0]->{left} = $_[1]; }
 sub set_right  { $_[0]->{right} = $_[1]; }
 sub set_height { $_[0]->{height} = $_[1]; }
-sub set_contrasena { $_[0]->{contrasena} = $_[1]; } # Útil para la Función 5 (Editar perfil)
+sub set_contrasena { $_[0]->{contrasena} = $_[1]; } 
 
-# Setter especial para la eliminación (copiar datos del sucesor)
+# Setter especial para la eliminación
 sub set_datos {
     my ($self, $nodo_origen) = @_;
     $self->{numero_colegio}  = $nodo_origen->get_numero_colegio();
@@ -55,5 +55,7 @@ sub es_hoja {
     my ($self) = @_;
     return (!defined($self->{left}) && !defined($self->{right})) ? 1 : 0;
 }
+
+
 
 1;

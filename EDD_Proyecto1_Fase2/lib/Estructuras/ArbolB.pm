@@ -6,191 +6,228 @@ use NodoArbolB;
 
 sub new {
     my ($class) = @_;
-    my $self = {
-        root  => undef,
-        orden => 4, # Orden 4 implica máximo 3 claves por nodo
-        size  => 0,
-    };
+    my $self = { root => undef, orden => 4, size => 0 };
     bless $self, $class;
     return $self;
 }
 
-sub is_empty {
-    my ($self) = @_;
-    return !defined($self->{root}) ? 1 : 0;
-}
+sub is_empty { return !defined($_[0]->{root}); }
 
-# --- INSERCIÓN MANUAL ---
+# --- INSERCIÓN ---
 sub insertar {
     my ($self, %args) = @_;
-    
-    eval {
-        if (!defined($self->{root})) {
-            # Árbol vacío, creamos la primera raíz
-            $self->{root} = NodoArbolB->new(1); # es_hoja = 1
-            push @{$self->{root}->get_claves()}, \%args;
-            $self->{size}++;
-            print "Suministro '$args{codigo}' insertado en raiz vacia.\n";
-            return;
-        }
-
-        my $raiz = $self->{root};
-        
-        # Si la raíz está llena (tiene 3 claves)
-        if ($raiz->cantidad_claves() == 3) {
-            my $nueva_raiz = NodoArbolB->new(0); # es_hoja = 0 (nodo interno)
-            
-            # La vieja raíz se convierte en el hijo izquierdo de la nueva raíz
-            push @{$nueva_raiz->get_hijos()}, $raiz;
-            
-            # Dividir la vieja raíz
-            $self->_split_hijo($nueva_raiz, 0, $raiz);
-            
-            # Ahora la nueva raíz tiene 1 clave y 2 hijos, insertamos en ella
-            $self->_insertar_no_lleno($nueva_raiz, \%args);
-            $self->{root} = $nueva_raiz;
-        } else {
-            # Raíz no está llena, insertar normal
-            $self->_insertar_no_lleno($raiz, \%args);
-        }
-        $self->{size}++;
-    };
-    if ($@) {
-        print "Error insertando en Arbol B: $@\n";
+    if (!defined($self->{root})) {
+        $self->{root} = NodoArbolB->new(1);
+        push @{$self->{root}->get_claves()}, \%args;
+    } else {
+        if ($self->{root}->cantidad_claves() == 3) {
+            my $s = NodoArbolB->new(0);
+            push @{$s->get_hijos()}, $self->{root};
+            $self->_split_hijo($s, 0, $self->{root});
+            $self->_insertar_no_lleno($s, \%args);
+            $self->{root} = $s;
+        } else { $self->_insertar_no_lleno($self->{root}, \%args); }
     }
+    $self->{size}++;
 }
 
-# Algoritmo de división manual (Split)
 sub _split_hijo {
-    my ($self, $nodo_padre, $indice_hijo, $nodo_lleno) = @_;
-    
-    # Creamos un nuevo nodo que será el "hermano derecho" del nodo lleno
-    my $nuevo_nodo = NodoArbolB->new($nodo_lleno->get_es_hoja());
-    
-    # Las claves en orden 4 son [0, 1, 2]. 
-    # La clave en índice 1 (la de en medio) subirá al padre.
-    # La clave en índice 2 se moverá al nuevo nodo.
-    
-    # 1. Extraemos la última clave del nodo lleno y la ponemos en el nuevo
-    my $clave_derecha = pop @{$nodo_lleno->get_claves()};
-    unshift @{$nuevo_nodo->get_claves()}, $clave_derecha;
-    
-    # 2. Extraemos la clave mediana que subirá
-    my $clave_mediana = pop @{$nodo_lleno->get_claves()};
-    
-    # 3. Si no es hoja, movemos también los 2 últimos hijos al nuevo nodo
-    if (!$nodo_lleno->get_es_hoja()) {
-        my $hijo_der2 = pop @{$nodo_lleno->get_hijos()};
-        my $hijo_der1 = pop @{$nodo_lleno->get_hijos()};
-        unshift @{$nuevo_nodo->get_hijos()}, $hijo_der1, $hijo_der2;
+    my ($self, $x, $i, $y) = @_;
+    my $z = NodoArbolB->new($y->get_es_hoja());
+    my $mid_val = splice(@{$y->get_claves()}, 1, 2); # Orden 4
+    my $mediana = shift @{$mid_val};
+    push @{$z->get_claves()}, @{$mid_val};
+    if (!$y->get_es_hoja()) {
+        my @hijos_z = splice(@{$y->get_hijos()}, 2, 2);
+        push @{$z->get_hijos()}, @hijos_z;
     }
-    
-    # 4. Insertar el nuevo nodo en el arreglo de hijos del padre
-    splice(@{$nodo_padre->get_hijos()}, $indice_hijo + 1, 0, $nuevo_nodo);
-    
-    # 5. Subir la clave mediana al arreglo de claves del padre
-    splice(@{$nodo_padre->get_claves()}, $indice_hijo, 0, $clave_mediana);
+    splice(@{$x->get_hijos()}, $i + 1, 0, $z);
+    splice(@{$x->get_claves()}, $i, 0, $mediana);
 }
 
 sub _insertar_no_lleno {
-    my ($self, $nodo, $args_ref) = @_;
-    my $i = $nodo->cantidad_claves() - 1;
-    my $clave_nueva = $args_ref->{codigo};
-
-    if ($nodo->get_es_hoja()) {
-        # Es hoja: encontramos la posición correcta moviendo los elementos mayores
-        while ($i >= 0 && ($nodo->get_claves()->[$i]->{codigo} gt $clave_nueva)) {
-            $i--;
-        }
-        
-        # Validación de duplicados
-        if ($i >= 0 && ($nodo->get_claves()->[$i]->{codigo} eq $clave_nueva)) {
-            die "El suministro '$clave_nueva' ya existe.";
-        }
-        
-        # Insertar en la posición
-        splice(@{$nodo->get_claves()}, $i + 1, 0, $args_ref);
-        print "Suministro '$clave_nueva' insertado en hoja.\n";
+    my ($self, $x, $k) = @_;
+    my $i = $x->cantidad_claves() - 1;
+    if ($x->get_es_hoja()) {
+        while ($i >= 0 && $x->get_claves()->[$i]->{codigo} gt $k->{codigo}) { $i--; }
+        splice(@{$x->get_claves()}, $i + 1, 0, $k);
     } else {
-        # Es nodo interno: buscar a qué hijo descender
-        while ($i >= 0 && ($nodo->get_claves()->[$i]->{codigo} gt $clave_nueva)) {
-            $i--;
-        }
+        while ($i >= 0 && $x->get_claves()->[$i]->{codigo} gt $k->{codigo}) { $i--; }
         $i++;
-        
-        # Si el hijo destino está lleno, lo dividimos primero
-        if ($nodo->get_hijos()->[$i]->cantidad_claves() == 3) {
-            $self->_split_hijo($nodo, $i, $nodo->get_hijos()->[$i]);
-            
-            # Determinar a cuál de los dos nuevos hijos divididos ir
-            if ($nodo->get_claves()->[$i]->{codigo} lt $clave_nueva) {
-                $i++;
-            }
+        if ($x->get_hijos()->[$i]->cantidad_claves() == 3) {
+            $self->_split_hijo($x, $i, $x->get_hijos()->[$i]);
+            if ($x->get_claves()->[$i]->{codigo} lt $k->{codigo}) { $i++; }
         }
-        $self->_insertar_no_lleno($nodo->get_hijos()->[$i], $args_ref);
+        $self->_insertar_no_lleno($x->get_hijos()->[$i], $k);
     }
 }
 
-# --- BÚSQUEDA ---
+# --- BUSCAR ---
 sub buscar {
-    my ($self, $codigo) = @_;
-    if ($self->is_empty()) { return undef; }
-    
-    my $resultado = undef;
-    eval {
-        $resultado = $self->_buscar_recursivo($self->{root}, $codigo);
-    };
-    if ($@) { print "Error en búsqueda Árbol B: $@\n"; }
-    return $resultado;
+    my ($self, $k) = @_;
+    return undef if !$self->{root};
+    return $self->_buscar_rec($self->{root}, $k);
 }
-
-sub _buscar_recursivo {
-    my ($self, $nodo, $codigo) = @_;
-    return undef if !defined($nodo);
-
+sub _buscar_rec {
+    my ($self, $n, $k) = @_;
     my $i = 0;
-    while ($i < $nodo->cantidad_claves() && ($codigo gt $nodo->get_claves()->[$i]->{codigo})) {
-        $i++;
-    }
-
-    # Si encontramos coincidencia exacta
-    if ($i < $nodo->cantidad_claves() && ($codigo eq $nodo->get_claves()->[$i]->{codigo})) {
-        return $nodo->get_claves()->[$i]; # Retorna el HashRef con los datos
-    }
-
-    # Si es hoja y no estaba, no existe
-    if ($nodo->get_es_hoja()) {
-        return undef;
-    }
-
-    # Bajar al hijo correspondiente
-    return $self->_buscar_recursivo($nodo->get_hijos()->[$i], $codigo);
+    while ($i < $n->cantidad_claves() && $k gt $n->get_claves()->[$i]->{codigo}) { $i++; }
+    if ($i < $n->cantidad_claves() && $k eq $n->get_claves()->[$i]->{codigo}) { return $n->get_claves()->[$i]; }
+    return $n->get_es_hoja() ? undef : $self->_buscar_rec($n->get_hijos()->[$i], $k);
 }
 
-# --- RECORRIDO IN-ORDEN ---
+# --- RECORRIDO IN-ORDEN (EL QUE PIDE LA GUI) ---
 sub in_orden {
     my ($self) = @_;
-    my @resultado;
-    eval { $self->_in_orden_recursivo($self->{root}, \@resultado); };
-    return \@resultado;
+    my @res;
+    $self->_in_rec($self->{root}, \@res);
+    return \@res; # Retorna referencia al array
 }
 
-sub _in_orden_recursivo {
-    my ($self, $nodo, $res) = @_;
-    if (defined($nodo)) {
-        my $i;
-        # Intercalar hijos y claves
-        for ($i = 0; $i < $nodo->cantidad_claves(); $i++) {
-            if (!$nodo->get_es_hoja()) {
-                $self->_in_orden_recursivo($nodo->get_hijos()->[$i], $res);
-            }
-            push @$res, $nodo->get_claves()->[$i];
-        }
-        # Último hijo a la derecha
-        if (!$nodo->get_es_hoja()) {
-            $self->_in_orden_recursivo($nodo->get_hijos()->[$i], $res);
-        }
+sub _in_rec {
+    my ($self, $n, $r) = @_;
+    return if !defined $n;
+    my $i;
+    for ($i = 0; $i < $n->cantidad_claves(); $i++) {
+        $self->_in_rec($n->get_hijos()->[$i], $r) if !$n->get_es_hoja();
+        push @$r, $n->get_claves()->[$i];
     }
+    $self->_in_rec($n->get_hijos()->[$i], $r) if !$n->get_es_hoja();
+}
+
+# ==========================================
+# --- 3. ELIMINACIÓN (REQUISITO FUNCIÓN 3.3) ---
+# ==========================================
+sub eliminar {
+    my ($self, $codigo) = @_;
+    return if !$self->{root};
+    eval {
+        $self->_eliminar_rec($self->{root}, $codigo);
+        if ($self->{root}->cantidad_claves() == 0) {
+            $self->{root} = $self->{root}->get_es_hoja() ? undef : $self->{root}->get_hijos()->[0];
+        }
+        $self->{size}--;
+    };
+}
+
+sub _eliminar_rec {
+    my ($self, $nodo, $k) = @_;
+    my $idx = 0;
+    while ($idx < $nodo->cantidad_claves() && $nodo->get_claves()->[$idx]->{codigo} lt $k) { $idx++; }
+
+    if ($idx < $nodo->cantidad_claves() && $nodo->get_claves()->[$idx]->{codigo} eq $k) {
+        if ($nodo->get_es_hoja()) { splice(@{$nodo->get_claves()}, $idx, 1); }
+        else { $self->_eliminar_no_hoja($nodo, $idx); }
+    } else {
+        return if $nodo->get_es_hoja();
+        my $ultimo = ($idx == $nodo->cantidad_claves());
+        if ($nodo->get_hijos()->[$idx]->cantidad_claves() < 1) { $self->_llenar($nodo, $idx); }
+        if ($ultimo && $idx > $nodo->cantidad_claves()) { $self->_eliminar_rec($nodo->get_hijos()->[$idx-1], $k); }
+        else { $self->_eliminar_rec($nodo->get_hijos()->[$idx], $k); }
+    }
+}
+
+sub _eliminar_no_hoja {
+    my ($self, $nodo, $idx) = @_;
+    my $item = $nodo->get_claves()->[$idx];
+    if ($nodo->get_hijos()->[$idx]->cantidad_claves() >= 1) {
+        my $pred = $self->_get_pred($nodo, $idx);
+        $nodo->get_claves()->[$idx] = $pred;
+        $self->_eliminar_rec($nodo->get_hijos()->[$idx], $pred->{codigo});
+    } elsif ($nodo->get_hijos()->[$idx+1]->cantidad_claves() >= 1) {
+        my $succ = $self->_get_succ($nodo, $idx);
+        $nodo->get_claves()->[$idx] = $succ;
+        $self->_eliminar_rec($nodo->get_hijos()->[$idx+1], $succ->{codigo});
+    } else {
+        $self->_fusionar($nodo, $idx);
+        $self->_eliminar_rec($nodo->get_hijos()->[$idx], $item->{codigo});
+    }
+}
+
+sub _llenar {
+    my ($self, $nodo, $i) = @_;
+    if ($i != 0 && $nodo->get_hijos()->[$i-1]->cantidad_claves() >= 2) { $self->_prestar_ant($nodo, $i); }
+    elsif ($i != $nodo->cantidad_claves() && $nodo->get_hijos()->[$i+1]->cantidad_claves() >= 2) { $self->_prestar_sig($nodo, $i); }
+    else {
+        if ($i != $nodo->cantidad_claves()) { $self->_fusionar($nodo, $i); }
+        else { $self->_fusionar($nodo, $i - 1); }
+    }
+}
+
+sub _prestar_ant {
+    my ($self, $nodo, $i) = @_;
+    my $hijo = $nodo->get_hijos()->[$i];
+    my $hermano = $nodo->get_hijos()->[$i-1];
+    unshift @{$hijo->get_claves()}, $nodo->get_claves()->[$i-1];
+    if (!$hijo->get_es_hoja()) { unshift @{$hijo->get_hijos()}, pop @{$hermano->get_hijos()}; }
+    $nodo->get_claves()->[$i-1] = pop @{$hermano->get_claves()};
+}
+
+sub _prestar_sig {
+    my ($self, $nodo, $i) = @_;
+    my $hijo = $nodo->get_hijos()->[$i];
+    my $hermano = $nodo->get_hijos()->[$i+1];
+    push @{$hijo->get_claves()}, $nodo->get_claves()->[$i];
+    if (!$hijo->get_es_hoja()) { push @{$hijo->get_hijos()}, shift @{$hermano->get_hijos()}; }
+    $nodo->get_claves()->[$i] = shift @{$hermano->get_claves()};
+}
+
+sub _fusionar {
+    my ($self, $nodo, $i) = @_;
+    my $hijo = $nodo->get_hijos()->[$i];
+    my $hermano = $nodo->get_hijos()->[$i+1];
+    push @{$hijo->get_claves()}, splice(@{$nodo->get_claves()}, $i, 1);
+    push @{$hijo->get_claves()}, @{$hermano->get_claves()};
+    if (!$hijo->get_es_hoja()) { push @{$hijo->get_hijos()}, @{$hermano->get_hijos()}; }
+    splice(@{$nodo->get_hijos()}, $i + 1, 1);
+}
+
+sub _get_pred {
+    my ($self, $nodo, $idx) = @_;
+    my $cur = $nodo->get_hijos()->[$idx];
+    while (!$cur->get_es_hoja()) { $cur = $cur->get_hijos()->[$cur->cantidad_claves()]; }
+    return $cur->get_claves()->[$cur->cantidad_claves()-1];
+}
+
+sub _get_succ {
+    my ($self, $nodo, $idx) = @_;
+    my $cur = $nodo->get_hijos()->[$idx+1];
+    while (!$cur->get_es_hoja()) { $cur = $cur->get_hijos()->[0]; }
+    return $cur->get_claves()->[0];
+}
+
+# ==========================================
+# --- 4. RECORRIDO ---
+# ==========================================
+
+# --- RECORRIDO PRE-ORDEN ---
+sub pre_orden {
+    my ($self) = @_;
+    my @resultado;
+    $self->_pre_orden_recursivo($self->{root}, \@resultado);
+    return \@resultado;
+}
+sub _pre_orden_recursivo {
+    my ($self, $nodo, $res) = @_;
+    return if !defined($nodo);
+    push @$res, $nodo;
+    $self->_pre_orden_recursivo($nodo->get_left(), $res);
+    $self->_pre_orden_recursivo($nodo->get_right(), $res);
+}
+
+# --- RECORRIDO POST-ORDEN ---
+sub post_orden {
+    my ($self) = @_;
+    my @resultado;
+    $self->_post_orden_recursivo($self->{root}, \@resultado);
+    return \@resultado;
+}
+sub _post_orden_recursivo {
+    my ($self, $nodo, $res) = @_;
+    return if !defined($nodo);
+    $self->_post_orden_recursivo($nodo->get_left(), $res);
+    $self->_post_orden_recursivo($nodo->get_right(), $res);
+    push @$res, $nodo;
 }
 
 1;

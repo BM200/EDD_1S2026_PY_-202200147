@@ -1,0 +1,50 @@
+digraph SparseMatrix {
+    node [shape=box, fontname="Arial"];
+    rankdir=TB;
+    nodesep=0.6;
+    ranksep=0.6;
+    Mt [label="Matriz", style=filled, fillcolor=grey, group=0];
+    { rank=same; Mt; C0 [label="LabFarma", group=1, style=filled, fillcolor=lightblue]; C1 [label="GenericLab", group=2, style=filled, fillcolor=lightblue]; C2 [label="FarmacentroGT", group=3, style=filled, fillcolor=lightblue]; C3 [label="MediTechGT", group=4, style=filled, fillcolor=lightblue]; C4 [label="BuenaVidaGT", group=5, style=filled, fillcolor=lightblue]; C5 [label="MediSupplyGT", group=6, style=filled, fillcolor=lightblue]; }
+    Mt -> C0;
+    C0 -> C1;
+    C1 -> C2;
+    C2 -> C3;
+    C3 -> C4;
+    C4 -> C5;
+    R0 [label="FarmaGT Distribuciones", group=0, style=filled, fillcolor=lightyellow];
+    Mt -> R0;
+    N_0_0 [label="20000", shape=circle, style=filled, fillcolor=white, group=1];
+    N_0_1 [label="16000", shape=circle, style=filled, fillcolor=white, group=2];
+    N_0_2 [label="3000", shape=circle, style=filled, fillcolor=white, group=3];
+    N_0_3 [label="15", shape=circle, style=filled, fillcolor=white, group=4];
+    N_0_4 [label="20", shape=circle, style=filled, fillcolor=white, group=5];
+    N_0_5 [label="100000", shape=circle, style=filled, fillcolor=white, group=6];
+    { rank=same; R0; N_0_0; N_0_1; N_0_2; N_0_3; N_0_4; N_0_5; }
+    R0 -> N_0_0 [constraint=false];
+    N_0_0 -> N_0_1 [constraint=false];
+    N_0_1 -> N_0_2 [constraint=false];
+    N_0_2 -> N_0_3 [constraint=false];
+    N_0_3 -> N_0_4 [constraint=false];
+    N_0_4 -> N_0_5 [constraint=false];
+    R1 [label="MediSupply Central S.A.", group=0, style=filled, fillcolor=lightyellow];
+    R0 -> R1;
+    N_1_1 [label="15000", shape=circle, style=filled, fillcolor=white, group=2];
+    N_1_2 [label="4000", shape=circle, style=filled, fillcolor=white, group=3];
+    N_1_4 [label="20", shape=circle, style=filled, fillcolor=white, group=5];
+    N_1_5 [label="25000", shape=circle, style=filled, fillcolor=white, group=6];
+    { rank=same; R1; N_1_1; N_1_2; N_1_4; N_1_5; }
+    R1 -> N_1_1 [constraint=false];
+    N_1_1 -> N_1_2 [constraint=false];
+    N_1_2 -> N_1_4 [constraint=false];
+    N_1_4 -> N_1_5 [constraint=false];
+    C0 -> N_0_0;
+    C1 -> N_0_1;
+    N_0_1 -> N_1_1;
+    C2 -> N_0_2;
+    N_0_2 -> N_1_2;
+    C3 -> N_0_3;
+    C4 -> N_0_4;
+    N_0_4 -> N_1_4;
+    C5 -> N_0_5;
+    N_0_5 -> N_1_5;
+}

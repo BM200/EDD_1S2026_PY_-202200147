@@ -1,0 +1,4 @@
+digraph G {
+    node [shape=record];
+    nodo5f9d2d220628 [label="{<f0> SUM-001 | <f1> SUM-002}", style=filled, fillcolor=palegreen];
+}

@@ -1,0 +1,10 @@
+digraph G {
+    rankdir=LR;
+    node [shape=box, style=filled, fillcolor=lightpink];
+    12345678_1 [label="NIT: 12345678-1\nFarmaGT Distribuciones"];
+    12345678_1 -> 23456789_2 [color=blue, constraint=true];
+    12345678_1 -> 23456789_2 [color=red, constraint=false];
+    23456789_2 [label="NIT: 23456789-2\nMediSupply Central S.A."];
+    23456789_2 -> 12345678_1 [color=blue, constraint=true];
+    23456789_2 -> 12345678_1 [color=red, constraint=false];
+}

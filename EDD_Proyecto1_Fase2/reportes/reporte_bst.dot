@@ -1,0 +1,10 @@
+digraph G {
+    node [shape=box, style=filled, fillcolor=lightyellow];
+    EQU_001 [label="EQU-001\nMonitor de Signos Vitales"];
+    EQU_001 -> EQU_002;
+    EQU_002 [label="EQU-002\nElectrocardiógrafo 12 Derivaciones"];
+    EQU_002 -> EQU_004;
+    EQU_004 [label="EQU-004\nTensiómetro Manual Aneroide"];
+    EQU_004 -> EQU_005;
+    EQU_005 [label="EQU-005\nCALIFICACION"];
+}
