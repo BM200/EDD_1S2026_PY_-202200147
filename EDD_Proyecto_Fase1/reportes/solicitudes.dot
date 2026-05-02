@@ -1,5 +1,12 @@
 digraph G {
     rankdir=LR;
     node [shape=circle, style=filled, color=lightblue, fontname="Arial"];
-    Vacio [label="Sin Solicitudes Pendientes", shape=box];
+    Sol_1 [label="ID: 1\nUCI\nMed: MED012", fillcolor=palegreen];
+    Sol_2 [label="ID: 2\nUCI\nMed: MED013", fillcolor=lightblue];
+    Sol_1 -> Sol_2 [weight=1];
+    Sol_1 -> Sol_2 [color=grey, style=dashed, constraint=false];
+    Sol_2 -> Sol_1 [weight=1];
+    Sol_2 -> Sol_1 [color=grey, style=dashed, constraint=false];
+    label="Total Solicitudes Pendientes: 2";
+    labelloc="b";
 }

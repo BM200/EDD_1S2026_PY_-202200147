@@ -1,5 +1,16 @@
 digraph G {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial"];
-    Vacio [label="Sin Proveedores"];
+    { rank=same;
+        "Prov_104434635" [label="Prove: Mario\nNIT: 104434635", fillcolor=lightblue, group=104434635];
+        "Prov_104444" [label="Prove: Rodrigo\nNIT: 104444", fillcolor=lightblue, group=104444];
+    }
+    "Prov_104434635" -> "Prov_104444" [constraint=false, color=blue];
+    "Prov_104444" -> "Prov_104434635" [constraint=false, color=blue];
+    "Ent_104434635_2026-02-09" [label="Fact: 2026-02-09\nMed: MED013\nCant: 200", fillcolor=lightgrey, group=104434635];
+    "Prov_104434635" -> "Ent_104434635_2026-02-09";
+    "Ent_104434635_124" [label="Fact: 124\nMed: MED012\nCant: 150", fillcolor=lightgrey, group=104434635];
+    "Ent_104434635_2026-02-09" -> "Ent_104434635_124";
+    "Ent_104444_2020" [label="Fact: 2020\nMed: MED012\nCant: 50", fillcolor=lightgrey, group=104444];
+    "Prov_104444" -> "Ent_104444_2020";
 }
